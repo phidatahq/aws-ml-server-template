@@ -14,7 +14,7 @@ ws_settings = WorkspaceSettings(
     dev_env="dev",
     # -*- Dev Apps
     dev_ml_server_enabled=True,
-    # dev_postgres_enabled=True,
+    dev_postgres_enabled=True,
     # -*- Production settings
     prd_env="prd",
     # -*- Production Apps

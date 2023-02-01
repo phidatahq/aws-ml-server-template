@@ -1,8 +1,6 @@
 from phidata.aws.config import AwsConfig
 from phidata.aws.resource.group import (
     AwsResourceGroup,
-    CacheCluster,
-    CacheSubnetGroup,
     DbInstance,
     DbSubnetGroup,
     EcsCluster,
@@ -11,7 +9,7 @@ from phidata.aws.resource.group import (
     EcsTaskDefinition,
 )
 
-from workspace.prd.docker_config import prd_api_image
+from workspace.prd.docker_config import prd_ml_server_image
 from workspace.settings import ws_settings
 
 #
@@ -39,18 +37,7 @@ prd_db_subnet_group = DbSubnetGroup(
     wait_for_deletion=wait_for_delete,
 )
 
-# -*- Elasticache Subnet Group
-prd_redis_subnet_group = CacheSubnetGroup(
-    name=f"{ws_settings.prd_key}-cache-sg",
-    enabled=ws_settings.prd_redis_enabled,
-    subnet_ids=ws_settings.subnet_ids,
-    skip_create=skip_create,
-    skip_delete=skip_delete,
-    wait_for_creation=wait_for_create,
-    wait_for_deletion=wait_for_delete,
-)
-
-# -*- Backend database instance
+# -*- ML database instance
 db_engine = "postgres"
 prd_db_instance = DbInstance(
     name=f"{ws_settings.prd_key}-db",
@@ -72,29 +59,11 @@ prd_db_instance = DbInstance(
     wait_for_deletion=wait_for_delete,
 )
 
-# -*- Redis cache
-prd_redis_cluster = CacheCluster(
-    name=f"{ws_settings.prd_key}-cache",
-    engine="redis",
-    enabled=ws_settings.prd_redis_enabled,
-    num_cache_nodes=1,
-    # NOTE: For production, use a larger instance type.
-    # Last checked price: $0.068 per hour = ~$50 per month
-    cache_node_type="cache.m6g.large",
-    security_group_ids=ws_settings.security_groups,
-    cache_subnet_group=prd_redis_subnet_group,
-    preferred_availability_zone=ws_settings.aws_az1,
-    skip_create=skip_create,
-    skip_delete=skip_delete,
-    wait_for_creation=wait_for_create,
-    wait_for_deletion=wait_for_delete,
-)
-
 # -*- ECS cluster
 launch_type = "FARGATE"
 prd_ecs_cluster = EcsCluster(
     name=f"{ws_settings.prd_key}-cluster",
-    enabled=ws_settings.prd_api_enabled,
+    enabled=ws_settings.prd_ml_server_enabled,
     ecs_cluster_name=ws_settings.prd_key,
     capacity_providers=[launch_type],
     skip_create=skip_create,
@@ -103,39 +72,25 @@ prd_ecs_cluster = EcsCluster(
     wait_for_deletion=wait_for_delete,
 )
 
-# -*- Api Container
-api_container_port = 8000
-prd_api_container = EcsContainer(
-    name=f"{ws_settings.ws_name}-{ws_settings.image_suffix}",
-    enabled=ws_settings.prd_api_enabled,
-    image=prd_api_image.get_image_str(),
-    port_mappings=[{"containerPort": api_container_port}],
-    command=["api-prd"],
+# -*- ML Server Container
+ml_server_container_port = 8000
+prd_ml_server_container = EcsContainer(
+    name=f"{ws_settings.ws_name}",
+    enabled=ws_settings.prd_ml_server_enabled,
+    image=prd_ml_server_image.get_image_str(),
+    port_mappings=[{"containerPort": ml_server_container_port}],
+    command=["ml_server-prd"],
     environment=[
         {"name": "RUNTIME", "value": "prd"},
-        {"name": "WAIT_FOR_DB", "value": "True"},
-        {"name": "WAIT_FOR_REDIS", "value": "True"},
-        # {"name": "UPGRADE_DB", "value": "True"},
         # Database configuration
-        {
-            "name": "DB_HOST",
-            "value": "backend-prd-db-a.cuqtj11ky8hc.us-east-1.rds.amazonaws.com",
-        },
+        {"name": "WAIT_FOR_DB", "value": "True"},
+        {"name": "DB_HOST", "value": ""},
         {"name": "DB_PORT", "value": "5432"},
         {"name": "DB_USER", "value": prd_db_instance.get_master_username()},
         {"name": "DB_PASS", "value": prd_db_instance.get_master_user_password()},
         {"name": "DB_SCHEMA", "value": prd_db_instance.get_db_name()},
-        # Redis configuration
-        {
-            "name": "REDIS_HOST",
-            "value": "backend-prd-cache.kymr3h.0001.use1.cache.amazonaws.com",
-        },
-        {"name": "REDIS_PORT", "value": "6379"},
-        # {"name": "REDIS_PASS", "value": ""},
-        {"name": "REDIS_SCHEMA", "value": "1"},
-        # {"name": "REDIS_DRIVER", "value": "rediss"},
-        # Celery configuration
-        {"name": "CELERY_REDIS_DB", "value": "2"},
+        # Upgrade database on startup
+        # {"name": "UPGRADE_DB", "value": "True"},
     ],
     log_configuration={
         "logDriver": "awslogs",
@@ -143,19 +98,19 @@ prd_api_container = EcsContainer(
             "awslogs-group": ws_settings.prd_key,
             "awslogs-region": ws_settings.aws_region,
             "awslogs-create-group": "true",
-            "awslogs-stream-prefix": "api",
+            "awslogs-stream-prefix": "ml_server",
         },
     },
 )
 
-# -*- Api Task Definition
-prd_api_task = EcsTaskDefinition(
-    name=f"{ws_settings.prd_key}-api-td",
-    family=f"{ws_settings.prd_key}-{ws_settings.image_suffix}",
+# -*- ML Server Task Definition
+prd_ml_server_task = EcsTaskDefinition(
+    name=f"{ws_settings.prd_key}-td",
+    family=f"{ws_settings.prd_key}",
     network_mode="awsvpc",
     cpu="512",
     memory="1024",
-    containers=[prd_api_container],
+    containers=[prd_ml_server_container],
     requires_compatibilities=[launch_type],
     skip_create=skip_create,
     skip_delete=skip_delete,
@@ -163,24 +118,17 @@ prd_api_task = EcsTaskDefinition(
     wait_for_deletion=wait_for_delete,
 )
 
-# -*- Api Service
-prd_api_service = EcsService(
-    name=f"{ws_settings.prd_key}-api-service",
-    ecs_service_name=f"{ws_settings.prd_key}-{ws_settings.image_suffix}",
-    desired_count=3,
+# -*- ML Server Service
+prd_ml_server_service = EcsService(
+    name=f"{ws_settings.prd_key}-service",
+    ecs_service_name=f"{ws_settings.prd_key}",
+    desired_count=1,
     launch_type=launch_type,
     cluster=prd_ecs_cluster,
-    task_definition=prd_api_task,
-    load_balancers=[
-        {
-            "targetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:@@@:targetgroup/@@@-tg/@@@",  # noqa: E501
-            "containerName": prd_api_container.name,
-            "containerPort": api_container_port,
-        }
-    ],
+    task_definition=prd_ml_server_task,
     network_configuration={
         "awsvpcConfiguration": {
-            "subnets": ws_settings.public_subnets,
+            "subnets": ws_settings.subnet_ids,
             "securityGroups": ws_settings.security_groups,
             "assignPublicIp": "ENABLED",
         }
@@ -198,11 +146,9 @@ prd_aws_resources = AwsResourceGroup(
     name=ws_settings.prd_key,
     db_subnet_groups=[prd_db_subnet_group],
     db_instances=[prd_db_instance],
-    cache_subnet_groups=[prd_redis_subnet_group],
-    cache_clusters=[prd_redis_cluster],
     ecs_clusters=[prd_ecs_cluster],
-    ecs_task_definitions=[prd_api_task],
-    ecs_services=[prd_api_service],
+    ecs_task_definitions=[prd_ml_server_task],
+    ecs_services=[prd_ml_server_service],
 )
 
 #
