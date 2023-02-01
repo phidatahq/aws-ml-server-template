@@ -21,18 +21,18 @@ app = typer.Typer(
 @app.command(short_help="Start")
 def start(
     app_name: str = typer.Argument(..., help="App Name"),
-    port: int = typer.Option(9096, "--port", "-p", help="Port", show_default=True),
+    port: int = typer.Option(9095, "--port", "-p", help="Port", show_default=True),
     print_debug_log: bool = typer.Option(
         False, "--debug", "-d", help="Print debug logs."
     ),
 ):
     """
     \b
-    Start app
+    Start ML Server
 
     \b
     Examples:
-    * `app start test`    -> Start ml/test.py
+    * `app start base`    -> Start ml/base.py
     """
     import sys
     import streamlit.web.cli as stcli
