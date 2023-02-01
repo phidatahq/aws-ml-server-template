@@ -16,7 +16,7 @@ class AppSettings(BaseSettings):
     secret_key: Optional[str]
     docs_enabled: bool = True
     host: str = "0.0.0.0"
-    port: int = 9090
+    port: int = 9095
 
     # Cors origin list to allow requests from. This list is derived from the runtime.
     cors_origin_list: Optional[List[str]] = None
