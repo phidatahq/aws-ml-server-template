@@ -9,7 +9,7 @@ from app.utils.log import logger, set_log_level_to_debug
 
 
 app = typer.Typer(
-    help="Api CLI",
+    help="Run ML Api",
     no_args_is_help=True,
     invoke_without_command=True,
     # https://typer.tiangolo.com/tutorial/exceptions/#disable-local-variables-for-security

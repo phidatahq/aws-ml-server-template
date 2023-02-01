@@ -1,6 +1,6 @@
 import logging
 
-LOGGER_NAME = "backend"
+LOGGER_NAME = "app"
 
 
 def get_logger(logger_name: str) -> logging.Logger:
@@ -23,9 +23,9 @@ def get_logger(logger_name: str) -> logging.Logger:
     return _logger
 
 
-logger: logging.Logger = get_logger(LOGGER_NAME)
-
-
 def set_log_level_to_debug():
     logger = logging.getLogger(LOGGER_NAME)
     logger.setLevel(logging.DEBUG)
+
+
+logger: logging.Logger = get_logger(LOGGER_NAME)

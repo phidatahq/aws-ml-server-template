@@ -6,7 +6,6 @@ from starlette.middleware.cors import CORSMiddleware
 from app import constants
 from app.settings import AppSettings
 from app.router.v1_router import v1_router
-from app.utils.log import logger
 
 
 def create_app() -> Tuple[FastAPI, AppSettings]:
@@ -38,9 +37,6 @@ def create_app() -> Tuple[FastAPI, AppSettings]:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-
-    if app_settings.runtime == "dev":
-        logger.info(f"Settings: {app_settings.json(indent=2)}")
 
     return app, app_settings
 

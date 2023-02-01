@@ -31,20 +31,19 @@ dev_ml_server_image = DockerImage(
     use_cache=ws_settings.use_cache,
 )
 
+container_volumes = {
+    str(ws_settings.ws_dir.parent): {"bind": "/usr/local/app", "mode": "rw"}
+}
+
 # -*- ML Server Container
-dev_ml_server_container = DockerContainer(
-    name=f"{ws_settings.ws_name}-server",
-    enabled=ws_settings.dev_ml_server_enabled,
+dev_api_server_container = DockerContainer(
+    name=f"{ws_settings.ws_name}-api",
+    enabled=ws_settings.dev_api_server_enabled,
     image=dev_ml_server_image.get_image_str(),
     command=["api-dev"],
     # platform="linux/amd64",
     ports={"9095": "9095"},
-    volumes={
-        str(ws_settings.ws_dir.parent): {
-            "bind": "/usr/local/app",
-            "mode": "rw",
-        },
-    },
+    volumes=container_volumes,
     use_cache=ws_settings.use_cache,
     environment={
         "RUNTIME": "dev",
@@ -61,6 +60,19 @@ dev_ml_server_container = DockerContainer(
     },
 )
 
+# -*- ML App Container
+dev_ml_app_container = DockerContainer(
+    name=f"{ws_settings.ws_name}-app",
+    enabled=ws_settings.dev_ml_server_enabled,
+    image=dev_ml_server_image.get_image_str(),
+    command=["ml", "start", "test"],
+    # platform="linux/amd64",
+    ports={"9096": "9096"},
+    volumes=container_volumes,
+    use_cache=ws_settings.use_cache,
+    environment={"RUNTIME": "dev"},
+)
+
 #
 # -*- Define dev Docker resources using the DockerConfig
 #
@@ -69,5 +81,5 @@ dev_docker_config = DockerConfig(
     network=ws_settings.ws_name,
     apps=[dev_db],
     images=[dev_ml_server_image],
-    containers=[dev_ml_server_container],
+    containers=[dev_api_server_container, dev_ml_app_container],
 )

@@ -33,6 +33,7 @@ dependencies = [
 
 [project.scripts]
 api = "app.cli.api:app"
+ml = "app.cli.ml:app"
 
 [build-system]
 requires = ["setuptools"]
