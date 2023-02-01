@@ -23,7 +23,7 @@ dependencies = [
   "alembic",
   "fastapi",
   "typer",
-  "uvicorn[standard]",
+  "uvicorn",
   # Streamlit for web apps
   "streamlit",
   # If using postgres

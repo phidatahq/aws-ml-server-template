@@ -30,7 +30,6 @@ gitpython==3.1.30
 google-auth==2.16.0
 h11==0.14.0
 httpcore==0.16.3
-httptools==0.5.0
 httpx==0.23.3
 identify==2.5.13
 idna==3.4
@@ -94,13 +93,10 @@ typing-extensions==4.4.0
 tzdata==2022.7
 tzlocal==4.2
 urllib3==1.26.14
-uvicorn[standard]==0.20.0
-uvloop==0.17.0
+uvicorn==0.20.0
 validators==0.20.0
 virtualenv==20.17.1
-watchfiles==0.18.1
 websocket-client==1.4.2
-websockets==10.4
 zipp==3.12.0
 
 # The following packages are considered to be unsafe in a requirements file:
