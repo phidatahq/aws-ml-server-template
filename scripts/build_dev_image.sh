@@ -5,7 +5,7 @@ set -e
 CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 REPO_ROOT="$( dirname ${CURR_DIR} )"
 REPO="local"
-NAME="api001"
+NAME="ml001"
 TAG="dev"
 
 # Run docker buildx create --use before running this script

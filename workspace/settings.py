@@ -7,21 +7,19 @@ from phidata.workspace.settings import WorkspaceSettings
 #
 ws_settings = WorkspaceSettings(
     # Workspace name: used for naming cloud resources
-    ws_name="api001",
+    ws_name="ml001",
     # Path to the workspace directory
     ws_dir=Path(__file__).parent.resolve(),
     # -*- Dev settings
     dev_env="dev",
     # -*- Dev Apps
-    dev_api_enabled=True,
-    dev_postgres_enabled=True,
-    dev_redis_enabled=True,
+    dev_ml_server_enabled=True,
+    # dev_postgres_enabled=True,
     # -*- Production settings
     prd_env="prd",
     # -*- Production Apps
-    prd_api_enabled=True,
-    prd_postgres_enabled=True,
-    prd_redis_enabled=True,
+    prd_ml_server_enabled=True,
+    # prd_postgres_enabled=True,
     # -*- AWS settings
     # Region for AWS resources
     aws_region="us-east-1",

@@ -35,7 +35,7 @@ jobs:
           file: Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ secrets.ECR_REPO }}/api001:dev
+          tags: ${{ secrets.ECR_REPO }}/ml001:dev
 
   build-prd-image:
 
@@ -66,4 +66,4 @@ jobs:
           file: Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ secrets.ECR_REPO }}/api001:prd
+          tags: ${{ secrets.ECR_REPO }}/ml001:prd

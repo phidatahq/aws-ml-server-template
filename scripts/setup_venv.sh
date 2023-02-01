@@ -10,7 +10,7 @@
 
 CURR_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$( dirname ${CURR_DIR} )"
-VENV_DIR="${REPO_ROOT}/.venv/apienv"
+VENV_DIR="${REPO_ROOT}/.venv/mlenv"
 source ${CURR_DIR}/_utils.sh
 
 main() {
@@ -26,7 +26,7 @@ main() {
   source ${VENV_DIR}/bin/activate
   source ${CURR_DIR}/install.sh
 
-  print_heading "Activate using: source .venv/apienv/bin/activate"
+  print_heading "Activate using: source .venv/mlenv/bin/activate"
 }
 
 main "$@"

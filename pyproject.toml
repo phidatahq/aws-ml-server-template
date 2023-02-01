@@ -21,12 +21,14 @@ dependencies = [
   "phidata==1.1.4",
   # Api libraries
   "alembic",
-  "celery[redis]",
   "fastapi",
-  "psycopg2-binary",
-  "sqlalchemy",
   "typer",
   "uvicorn[standard]",
+  # Streamlit for web apps
+  "streamlit",
+  # If using postgres
+  # "psycopg2-binary",
+  # "sqlalchemy",
 ]
 
 [project.scripts]
