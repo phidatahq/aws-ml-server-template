@@ -14,7 +14,7 @@ ws_settings = WorkspaceSettings(
     dev_env="dev",
     # -*- Dev Apps
     dev_ml_server_enabled=True,
-    dev_postgres_enabled=True,
+    # dev_postgres_enabled=True,
     # -*- Production settings
     prd_env="prd",
     # -*- Production Apps
@@ -35,7 +35,7 @@ ws_settings = WorkspaceSettings(
     # Repository for images
     # image_repo="your-repo",
     # Build images locally
-    build_images=True,
+    # build_images=True,
     # Push images after building
     # push_images=True,
     # Skip cache when building images
