@@ -71,7 +71,6 @@ dev_ml_app_container = DockerContainer(
     ports={"9095": "9095"},
     volumes=container_volumes,
     use_cache=ws_settings.use_cache,
-    environment={"RUNTIME": "dev"},
 )
 
 #

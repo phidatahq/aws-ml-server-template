@@ -29,6 +29,10 @@ dependencies = [
   # For postgres
   # "psycopg2-binary",
   # "sqlalchemy",
+  # ML libraries
+  "altair",
+  "pandas",
+  "pydeck",
 ]
 
 [project.scripts]

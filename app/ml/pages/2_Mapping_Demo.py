@@ -4,11 +4,11 @@ import pandas as pd
 import pydeck as pdk
 
 import streamlit as st
-from streamlit.hello.utils import show_code
+from app.ml.utils import show_code
 
 
 def mapping_demo():
-    @st.cache_data
+    @st.cache
     def from_data_file(filename):
         url = (
             "http://raw.githubusercontent.com/streamlit/"
