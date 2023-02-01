@@ -29,9 +29,6 @@ dependencies = [
   # For postgres
   # "psycopg2-binary",
   # "sqlalchemy",
-  # Dataframe libraries
-  "pandas",
-  "polars",
 ]
 
 [project.scripts]
