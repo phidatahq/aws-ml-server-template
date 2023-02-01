@@ -12,6 +12,7 @@ prd_ml_server_image = DockerImage(
     tag=ws_settings.prd_env,
     enabled=(ws_settings.build_images and ws_settings.prd_ml_server_enabled),
     path=str(ws_settings.ws_dir.parent),
+    # platform="linux/amd64",
     pull=ws_settings.force_pull_images,
     push_image=ws_settings.push_images,
     skip_docker_cache=ws_settings.skip_image_cache,

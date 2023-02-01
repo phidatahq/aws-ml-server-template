@@ -14,8 +14,8 @@ dev_db = PostgresDb(
     db_user=ws_settings.ws_name,
     db_password=ws_settings.ws_name,
     db_schema=ws_settings.ws_name,
-    # Connect to this db on port 9315
-    container_host_port=9315,
+    # Connect to this db on port 9325
+    container_host_port=9325,
 )
 
 # -*- ML Server Image
@@ -24,6 +24,7 @@ dev_ml_server_image = DockerImage(
     tag=ws_settings.dev_env,
     enabled=(ws_settings.build_images and ws_settings.dev_ml_server_enabled),
     path=str(ws_settings.ws_dir.parent),
+    # platform="linux/amd64",
     pull=ws_settings.force_pull_images,
     push_image=ws_settings.push_images,
     skip_docker_cache=ws_settings.skip_image_cache,
@@ -36,22 +37,8 @@ dev_ml_server_container = DockerContainer(
     enabled=ws_settings.dev_ml_server_enabled,
     image=dev_ml_server_image.get_image_str(),
     command=["api-dev"],
-    environment={
-        "RUNTIME": "dev",
-        # Database configuration
-        # Wait for database to be ready
-        "WAIT_FOR_DB": True,
-        "DB_HOST": dev_db.get_db_host_docker(),
-        "DB_PORT": dev_db.get_db_port_docker(),
-        "DB_USER": dev_db.get_db_user(),
-        "DB_PASS": dev_db.get_db_password(),
-        "DB_SCHEMA": dev_db.get_db_schema(),
-        # Upgrade database on startup
-        # "UPGRADE_DB": True,
-    },
-    ports={
-        "9095": "9095",
-    },
+    # platform="linux/amd64",
+    ports={"9095": "9095"},
     volumes={
         str(ws_settings.ws_dir.parent): {
             "bind": "/usr/local/app",
@@ -59,6 +46,19 @@ dev_ml_server_container = DockerContainer(
         },
     },
     use_cache=ws_settings.use_cache,
+    environment={
+        "RUNTIME": "dev",
+        # Database configuration
+        # Wait for database to be ready
+        # "WAIT_FOR_DB": True,
+        # "DB_HOST": dev_db.get_db_host_docker(),
+        # "DB_PORT": dev_db.get_db_port_docker(),
+        # "DB_USER": dev_db.get_db_user(),
+        # "DB_PASS": dev_db.get_db_password(),
+        # "DB_SCHEMA": dev_db.get_db_schema(),
+        # Upgrade database on startup
+        # "UPGRADE_DB": True,
+    },
 )
 
 #

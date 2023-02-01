@@ -75,20 +75,20 @@ prd_ecs_cluster = EcsCluster(
 # -*- ML Server Container
 ml_server_container_port = 8000
 prd_ml_server_container = EcsContainer(
-    name=f"{ws_settings.ws_name}",
+    name=ws_settings.ws_name,
     enabled=ws_settings.prd_ml_server_enabled,
     image=prd_ml_server_image.get_image_str(),
     port_mappings=[{"containerPort": ml_server_container_port}],
-    command=["ml_server-prd"],
+    command=["api-prd"],
     environment=[
         {"name": "RUNTIME", "value": "prd"},
         # Database configuration
-        {"name": "WAIT_FOR_DB", "value": "True"},
-        {"name": "DB_HOST", "value": ""},
-        {"name": "DB_PORT", "value": "5432"},
-        {"name": "DB_USER", "value": prd_db_instance.get_master_username()},
-        {"name": "DB_PASS", "value": prd_db_instance.get_master_user_password()},
-        {"name": "DB_SCHEMA", "value": prd_db_instance.get_db_name()},
+        # {"name": "WAIT_FOR_DB", "value": "True"},
+        # {"name": "DB_HOST", "value": ""},
+        # {"name": "DB_PORT", "value": "5432"},
+        # {"name": "DB_USER", "value": prd_db_instance.get_master_username()},
+        # {"name": "DB_PASS", "value": prd_db_instance.get_master_user_password()},
+        # {"name": "DB_SCHEMA", "value": prd_db_instance.get_db_name()},
         # Upgrade database on startup
         # {"name": "UPGRADE_DB", "value": "True"},
     ],
@@ -98,7 +98,7 @@ prd_ml_server_container = EcsContainer(
             "awslogs-group": ws_settings.prd_key,
             "awslogs-region": ws_settings.aws_region,
             "awslogs-create-group": "true",
-            "awslogs-stream-prefix": "ml_server",
+            "awslogs-stream-prefix": "ml-server",
         },
     },
 )
@@ -106,7 +106,7 @@ prd_ml_server_container = EcsContainer(
 # -*- ML Server Task Definition
 prd_ml_server_task = EcsTaskDefinition(
     name=f"{ws_settings.prd_key}-td",
-    family=f"{ws_settings.prd_key}",
+    family=ws_settings.prd_key,
     network_mode="awsvpc",
     cpu="512",
     memory="1024",
@@ -119,9 +119,9 @@ prd_ml_server_task = EcsTaskDefinition(
 )
 
 # -*- ML Server Service
-prd_ml_server_service = EcsService(
+prd_ml_service = EcsService(
     name=f"{ws_settings.prd_key}-service",
-    ecs_service_name=f"{ws_settings.prd_key}",
+    ecs_service_name=ws_settings.prd_key,
     desired_count=1,
     launch_type=launch_type,
     cluster=prd_ecs_cluster,
@@ -148,7 +148,7 @@ prd_aws_resources = AwsResourceGroup(
     db_instances=[prd_db_instance],
     ecs_clusters=[prd_ecs_cluster],
     ecs_task_definitions=[prd_ml_server_task],
-    ecs_services=[prd_ml_server_service],
+    ecs_services=[prd_ml_service],
 )
 
 #

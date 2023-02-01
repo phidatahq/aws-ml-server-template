@@ -26,7 +26,7 @@ dependencies = [
   "uvicorn",
   # Streamlit for web apps
   "streamlit",
-  # If using postgres
+  # For postgres
   # "psycopg2-binary",
   # "sqlalchemy",
 ]
