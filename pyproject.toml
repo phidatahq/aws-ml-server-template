@@ -38,8 +38,6 @@ dependencies = [
   "streamlit_observable",
   "statsmodels",
   "seaborn"
-
-
 ]
 
 [project.scripts]
