@@ -29,6 +29,17 @@ dependencies = [
   # For postgres
   # "psycopg2-binary",
   # "sqlalchemy",
+  # Web apps
+  "langdetect",
+  "openai",
+  "scikit-learn",
+  "iso-639",
+  "streamlit_chat",
+  "streamlit_observable",
+  "statsmodels",
+  "seaborn"
+
+
 ]
 
 [project.scripts]
