@@ -24,20 +24,19 @@ dependencies = [
   "fastapi",
   "typer",
   "uvicorn",
-  # Streamlit for web apps
-  "streamlit",
   # For postgres
   # "psycopg2-binary",
   # "sqlalchemy",
-  # Web apps
+  # For ML apps
+  "iso-639",
   "langdetect",
   "openai",
   "scikit-learn",
-  "iso-639",
+  "seaborn",
+  "statsmodels",
   "streamlit_chat",
   "streamlit_observable",
-  "statsmodels",
-  "seaborn"
+  "streamlit",
 ]
 
 [project.scripts]
