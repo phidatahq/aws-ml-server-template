@@ -64,8 +64,8 @@ packaging==23.0
 pandas==1.5.3
 pathspec==0.10.3
 patsy==0.5.3
-phidata==1.2.0
-phiterm==1.2.0
+phidata==1.4.1
+phiterm==1.4.1
 pillow==9.4.0
 platformdirs==2.6.2
 pluggy==1.0.0
