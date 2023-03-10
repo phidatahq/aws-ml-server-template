@@ -4,7 +4,6 @@ LOGGER_NAME = "app"
 
 
 def get_logger(logger_name: str) -> logging.Logger:
-
     from rich.logging import RichHandler
 
     rich_handler = RichHandler(

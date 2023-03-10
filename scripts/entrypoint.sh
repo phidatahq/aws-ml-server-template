@@ -13,25 +13,38 @@ if [[ "$PRINT_ENV_ON_LOAD" = true || "$PRINT_ENV_ON_LOAD" = True ]]; then
 fi
 
 ############################################################################
+# Wait for Services
+############################################################################
+
+if [[ "$WAIT_FOR_DB" = true || "$WAIT_FOR_DB" = True ]]; then
+  dockerize \
+    -wait tcp://$DB_HOST:$DB_PORT \
+    -timeout 300s
+fi
+
+############################################################################
+# Install dependencies
+############################################################################
+
+if [[ "$INSTALL_REQUIREMENTS" = true || "$INSTALL_REQUIREMENTS" = True ]]; then
+  echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+  echo "Installing requirements: $REQUIREMENTS_FILE_PATH"
+  pip3 install -r $REQUIREMENTS_FILE_PATH
+  echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+fi
+
+############################################################################
 # Start App
 ############################################################################
 
 case "$1" in
-  api-dev)
-    echo "Running: api start --reload"
-    exec api start --reload
-    ;;
-  api-prd)
-    echo "Running: api start"
-    exec api start
-    ;;
   chill)
     ;;
   *)
     echo "Running: $@"
-    exec $@
+    exec "$@"
     ;;
 esac
 
-echo ">>> hello world!"
+echo ">>> Hello World!"
 while true; do sleep 18000; done

@@ -1,6 +1,6 @@
-## Api Server
+## ML Server
 
-This repo contains the code for an API server with 2 environments:
+This repo contains the code for a ML server with 2 environments:
 
 1. dev: A development env running on docker
 2. prd: A production env running on AWS ECS
@@ -10,8 +10,8 @@ This repo contains the code for an API server with 2 environments:
 1. Create + activate a virtual env:
 
 ```sh
-python3 -m venv ~/.venvs/appenv
-source ~/.venvs/appenv/bin/activate
+python3 -m venv ~/.venvs/mlenv
+source ~/.venvs/mlenv/bin/activate
 ```
 
 2. Install + init `phidata`:
@@ -21,7 +21,7 @@ pip install phidata
 phi init -l
 ```
 
-> from the `backend` dir:
+> from the `ml-server` dir:
 
 3. Setup workspace:
 

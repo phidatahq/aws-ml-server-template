@@ -13,7 +13,7 @@ RUN groupadd -g 61000 ${USER} \
 COPY . ${HOME_DIR}
 # Install pinned requirements
 RUN pip install -r ${HOME_DIR}/requirements.txt
-# Install package for the `app` cli
+# Install project for the `api` and `ml` cli commands
 RUN pip install ${HOME_DIR}
 
 USER ${USER}

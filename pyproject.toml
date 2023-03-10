@@ -1,5 +1,5 @@
 [project]
-name = "api"
+name = "ml001"
 version = "0.1.0"
 requires-python = ">3.7"
 readme = "README.md"
@@ -19,36 +19,38 @@ dependencies = [
   # Linting
   "ruff",
   "phidata==1.4.1",
-  # Api libraries
-  "alembic",
-  "fastapi",
-  "typer",
-  "uvicorn",
-  # For postgres
-  # "psycopg2-binary",
-  # "sqlalchemy",
-  # For ML apps
+  # Libraries for ML Apps
   "iso-639",
   "langdetect",
   "openai",
+  "pandas",
+  "polars",
   "scikit-learn",
   "seaborn",
   "statsmodels",
-  "streamlit_chat",
-  "streamlit_observable",
+  "streamlit-chat",
+  "streamlit-observable",
   "streamlit",
+  # Libraries for Api server
+  "fastapi",
+  "typer",
+  "uvicorn",
+  # Libraries for Postgres
+  "alembic",
+  "psycopg2-binary",
+  "sqlalchemy",
 ]
 
 [project.scripts]
-api = "app.cli.api:app"
 ml = "app.cli.ml:app"
+api = "app.cli.api:app"
 
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["app", "workspace"]
+packages = ["app", "ml", "workspace"]
 
 # Update this value if the workspace directory is renamed.
 # [tool.phidata]
@@ -70,7 +72,14 @@ exclude = [
 
 [[tool.mypy.overrides]]
 module = [
+  "iso639.*",
+  "langdetect.*",
+  "matplotlib.*",
+  "pandas.*",
   "phidata.*",
-  "setuptools.*",
+  "seaborn.*",
+  "statsmodels.*",
+  "streamlit_chat.*",
+  "streamlit_observable.*",
 ]
 ignore_missing_imports = true

@@ -7,7 +7,7 @@ from workspace.settings import ws_settings
 # -*- Dev Docker resources
 #
 
-# -*- Postgres database
+# -*- Define Postgres database for dev data
 dev_db = PostgresDb(
     name=f"{ws_settings.ws_name}-db",
     enabled=ws_settings.dev_postgres_enabled,
@@ -25,6 +25,7 @@ dev_ml_server_image = DockerImage(
     enabled=(ws_settings.build_images and ws_settings.dev_ml_server_enabled),
     path=str(ws_settings.ws_dir.parent),
     # platform="linux/amd64",
+    dockerfile="Dockerfile",
     pull=ws_settings.force_pull_images,
     push_image=ws_settings.push_images,
     skip_docker_cache=ws_settings.skip_image_cache,
@@ -32,6 +33,9 @@ dev_ml_server_image = DockerImage(
 )
 
 # -*- Settings
+# wait for database to be available before starting app
+wait_for_db: bool = True
+# mount
 container_volumes = {
     str(ws_settings.ws_dir.parent): {"bind": "/usr/local/app", "mode": "rw"}
 }

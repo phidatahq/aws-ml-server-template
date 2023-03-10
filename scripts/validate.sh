@@ -9,7 +9,6 @@
 # 4. Lint using ruff
 # Usage:
 #   ./scripts/validate.sh
-#
 ############################################################################
 
 CURR_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
