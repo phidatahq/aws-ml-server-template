@@ -1,5 +1,6 @@
 from phidata.app.postgres import PostgresDb
-from phidata.docker.config import DockerConfig, DockerContainer, DockerImage
+from phidata.app.server import ApiServer, AppServer
+from phidata.docker.config import DockerConfig, DockerImage
 
 from workspace.settings import ws_settings
 
@@ -7,7 +8,43 @@ from workspace.settings import ws_settings
 # -*- Dev Docker resources
 #
 
-# -*- Define Postgres database for dev data
+# -*- ML Server Image
+dev_ml_server_image = DockerImage(
+    name=f"{ws_settings.image_repo}/{ws_settings.ws_name}",
+    tag=ws_settings.dev_env,
+    # Use the pre-built image by default
+    # enabled=False,
+    # To build your own image, uncomment the following line
+    enabled=(ws_settings.build_images and ws_settings.dev_ml_server_enabled),
+    path=str(ws_settings.ws_dir.parent),
+    # Manually specify the platform
+    # platform="linux/amd64",
+    dockerfile="Dockerfile",
+    pull=ws_settings.force_pull_images,
+    push_image=ws_settings.push_images,
+    skip_docker_cache=ws_settings.skip_image_cache,
+    use_cache=ws_settings.use_cache,
+)
+
+# -*- App Server running Streamlit on port 9095
+dev_app_server = AppServer(
+    name=f"{ws_settings.ws_name}-app",
+    enabled=ws_settings.dev_ml_server_enabled,
+    image=dev_ml_server_image,
+    mount_workspace=True,
+    use_cache=ws_settings.use_cache,
+)
+
+# -*- Api Server running FastAPI on port 9090
+dev_api_server = ApiServer(
+    name=f"{ws_settings.ws_name}-api",
+    enabled=ws_settings.dev_api_server_enabled,
+    image=dev_ml_server_image,
+    mount_workspace=True,
+    use_cache=ws_settings.use_cache,
+)
+
+# -*- Postgres database used for dev data
 dev_db = PostgresDb(
     name=f"{ws_settings.ws_name}-db",
     enabled=ws_settings.dev_postgres_enabled,
@@ -18,72 +55,12 @@ dev_db = PostgresDb(
     container_host_port=9325,
 )
 
-# -*- ML Server Image
-dev_ml_server_image = DockerImage(
-    name=f"{ws_settings.image_repo}/{ws_settings.ws_name}",
-    tag=ws_settings.dev_env,
-    enabled=(ws_settings.build_images and ws_settings.dev_ml_server_enabled),
-    path=str(ws_settings.ws_dir.parent),
-    # platform="linux/amd64",
-    dockerfile="Dockerfile",
-    pull=ws_settings.force_pull_images,
-    push_image=ws_settings.push_images,
-    skip_docker_cache=ws_settings.skip_image_cache,
-    use_cache=ws_settings.use_cache,
-)
-
-# -*- Settings
-# wait for database to be available before starting app
-wait_for_db: bool = True
-# mount
-container_volumes = {
-    str(ws_settings.ws_dir.parent): {"bind": "/usr/local/app", "mode": "rw"}
-}
-
-# -*- Api Server Container
-dev_api_server_container = DockerContainer(
-    name=f"{ws_settings.ws_name}-api",
-    enabled=ws_settings.dev_api_server_enabled,
-    image=dev_ml_server_image.get_image_str(),
-    command=["api-dev"],
-    # platform="linux/amd64",
-    ports={"9090": "9090"},
-    volumes=container_volumes,
-    use_cache=ws_settings.use_cache,
-    environment={
-        "RUNTIME": "dev",
-        # Database configuration
-        # Wait for database to be ready
-        # "WAIT_FOR_DB": True,
-        # "DB_HOST": dev_db.get_db_host_docker(),
-        # "DB_PORT": dev_db.get_db_port_docker(),
-        # "DB_USER": dev_db.get_db_user(),
-        # "DB_PASS": dev_db.get_db_password(),
-        # "DB_SCHEMA": dev_db.get_db_schema(),
-        # Upgrade database on startup
-        # "UPGRADE_DB": True,
-    },
-)
-
-# -*- ML Server Container
-dev_ml_app_container = DockerContainer(
-    name=f"{ws_settings.ws_name}-server",
-    enabled=ws_settings.dev_ml_server_enabled,
-    image=dev_ml_server_image.get_image_str(),
-    command=["ml", "start", "Home", "--port", "9095"],
-    # platform="linux/amd64",
-    ports={"9095": "9095"},
-    volumes=container_volumes,
-    use_cache=ws_settings.use_cache,
-)
-
 #
 # -*- Define dev Docker resources using the DockerConfig
 #
 dev_docker_config = DockerConfig(
     env=ws_settings.dev_env,
     network=ws_settings.ws_name,
-    apps=[dev_db],
+    apps=[dev_api_server, dev_app_server, dev_db],
     images=[dev_ml_server_image],
-    containers=[dev_api_server_container, dev_ml_app_container],
 )

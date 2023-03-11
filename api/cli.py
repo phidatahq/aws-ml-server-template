@@ -5,11 +5,11 @@ Usage:
 
 import typer
 
-from app.utils.log import logger, set_log_level_to_debug
+from api.utils.log import logger, set_log_level_to_debug
 
 
-app = typer.Typer(
-    help="Run ML Api",
+cli = typer.Typer(
+    help="Run Api commands",
     no_args_is_help=True,
     invoke_without_command=True,
     # https://typer.tiangolo.com/tutorial/exceptions/#disable-local-variables-for-security
@@ -17,7 +17,7 @@ app = typer.Typer(
 )
 
 
-@app.command(short_help="Start")
+@cli.command(short_help="Start")
 def start(
     reload: bool = typer.Option(
         False, "--reload", "-r", help="Reload", show_default=True
@@ -28,7 +28,7 @@ def start(
 ):
     """
     \b
-    Start api
+    Start Api server.
 
     \b
     Examples:
@@ -36,27 +36,39 @@ def start(
     * `api start -r` -> Start App with reload
     """
     import uvicorn
-    from app.main import app_settings
+    from api.settings import api_settings
 
     if print_debug_log:
         set_log_level_to_debug()
 
-    logger.info("Starting App")
+    logger.info("Starting Api")
     uvicorn.run(
-        "app.main:app",
-        host=app_settings.host,
-        port=app_settings.port,
+        "api.app:app",
+        host=api_settings.host,
+        port=api_settings.port,
         reload=reload,
     )
 
 
-@app.command(short_help="Status")
-def status(
+@cli.command(short_help="Print Settings")
+def settings(
     print_debug_log: bool = typer.Option(
         False, "-d", "--debug", help="Print debug logs."
     ),
 ):
+    """
+    \b
+    Print Api settings.
+
+    \b
+    Examples:
+    * `api settings`    -> Print Api settings
+    * `api settings -d` -> Print Api settings with debug logs
+    """
+    from api.settings import api_settings
+
     if print_debug_log:
         set_log_level_to_debug()
 
-    logger.info("App Status")
+    logger.info("Api Settings:")
+    logger.info(api_settings.json(indent=2))

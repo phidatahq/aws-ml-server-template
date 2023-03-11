@@ -1,6 +1,6 @@
 import logging
 
-LOGGER_NAME = "app"
+LOGGER_NAME = "api"
 
 
 def get_logger(logger_name: str) -> logging.Logger:

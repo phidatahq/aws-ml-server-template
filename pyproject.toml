@@ -42,15 +42,15 @@ dependencies = [
 ]
 
 [project.scripts]
-ml = "app.cli.ml:app"
-api = "app.cli.api:app"
+api = "api.cli:cli"
+app = "app.cli:cli"
 
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["app", "ml", "workspace"]
+packages = ["api", "app", "workspace", "tests"]
 
 # Update this value if the workspace directory is renamed.
 # [tool.phidata]
@@ -78,6 +78,7 @@ module = [
   "pandas.*",
   "phidata.*",
   "seaborn.*",
+  "setuptools.*",
   "statsmodels.*",
   "streamlit_chat.*",
   "streamlit_observable.*",
