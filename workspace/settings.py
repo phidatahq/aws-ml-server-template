@@ -14,7 +14,7 @@ ws_settings = WorkspaceSettings(
     dev_env="dev",
     # -*- Dev Apps
     dev_ml_server_enabled=True,
-    dev_api_server_enabled=True,
+    # dev_api_server_enabled=True,
     # dev_postgres_enabled=True,
     # -*- Production settings
     prd_env="prd",
@@ -30,9 +30,9 @@ ws_settings = WorkspaceSettings(
     aws_az2="us-east-1b",
     # aws_az3="us-east-1c",
     # Subnet IDs for AWS resources
-    subnet_ids=None,
+    # subnet_ids=None,
     # Security Groups for AWS resources
-    security_groups=None,
+    # security_groups=None,
     # -*- Image Settings
     # Repository for images
     # image_repo="your-repo",

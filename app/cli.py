@@ -4,8 +4,6 @@ Usage:
 """
 import typer
 
-from api.utils.log import logger, set_log_level_to_debug
-
 
 cli = typer.Typer(
     help="Run App commands",
@@ -16,29 +14,25 @@ cli = typer.Typer(
 )
 
 
-@cli.command(short_help="Start")
+@cli.command(short_help="Start App Server")
 def start(
     name: str = typer.Argument("Home", help="App Name", show_default=True),
-    print_debug_log: bool = typer.Option(
-        False, "--debug", "-d", help="Print debug logs."
-    ),
 ):
     """
     \b
-    Start ML App.
+    Start App server.
 
     \b
     Examples:
-    * `app start`    -> Start ml/Home.py
+    * `app start`         -> Start ml/Home.py
     * `app start base`    -> Start ml/base.py
     """
     import sys
-
-    from pathlib import Path
     import streamlit.web.cli as stcli
 
-    if print_debug_log:
-        set_log_level_to_debug()
+    from pathlib import Path
+    from app.settings import app_settings
+    from app.utils.log import logger
 
     app_dir = Path(__file__).parent.resolve()
     app_file = app_dir.joinpath(f"{name}.py")
@@ -51,14 +45,31 @@ def start(
         "run",
         str(app_file),
         "--server.port",
-        "9095",
+        str(app_settings.port),
         "--server.headless",
-        "true",
+        str(app_settings.headless),
         "--browser.gatherUsageStats",
-        "false",
+        str(app_settings.gather_usage_stats),
         "--server.maxUploadSize",
-        "100",
+        str(app_settings.max_upload_size),
         "--runner.magicEnabled",
-        "false",
+        str(app_settings.magic_enabled),
     ]
     sys.exit(stcli.main())
+
+
+@cli.command(short_help="Print Settings")
+def settings():
+    """
+    \b
+    Print App settings.
+
+    \b
+    Examples:
+    * `app settings`    -> Print Api settings
+    """
+    from app.settings import app_settings
+    from app.utils.log import logger
+
+    logger.info("App Settings:")
+    logger.info(app_settings.json(indent=2))

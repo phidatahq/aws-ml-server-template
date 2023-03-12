@@ -19,26 +19,19 @@ dependencies = [
   # Linting
   "ruff",
   "phidata==1.4.1",
-  # Libraries for ML Apps
-  "iso-639",
-  "langdetect",
-  "openai",
+  # Libraries for data processing
   "pandas",
   "polars",
-  "scikit-learn",
-  "seaborn",
-  "statsmodels",
-  "streamlit-chat",
-  "streamlit-observable",
+  "duckdb-engine",
+  # Libraries for ML Apps
+  "openai",
+  "langchain",
   "streamlit",
+  "streamlit-chat",
   # Libraries for Api server
   "fastapi",
   "typer",
   "uvicorn",
-  # Libraries for Postgres
-  "alembic",
-  "psycopg2-binary",
-  "sqlalchemy",
 ]
 
 [project.scripts]
@@ -72,15 +65,9 @@ exclude = [
 
 [[tool.mypy.overrides]]
 module = [
-  "iso639.*",
-  "langdetect.*",
-  "matplotlib.*",
   "pandas.*",
   "phidata.*",
-  "seaborn.*",
   "setuptools.*",
-  "statsmodels.*",
   "streamlit_chat.*",
-  "streamlit_observable.*",
 ]
 ignore_missing_imports = true

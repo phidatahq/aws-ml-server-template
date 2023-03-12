@@ -17,9 +17,7 @@ dev_ml_server_image = DockerImage(
     # To build your own image, uncomment the following line
     enabled=(ws_settings.build_images and ws_settings.dev_ml_server_enabled),
     path=str(ws_settings.ws_dir.parent),
-    # Manually specify the platform
     # platform="linux/amd64",
-    dockerfile="Dockerfile",
     pull=ws_settings.force_pull_images,
     push_image=ws_settings.push_images,
     skip_docker_cache=ws_settings.skip_image_cache,
@@ -33,6 +31,7 @@ dev_app_server = AppServer(
     image=dev_ml_server_image,
     mount_workspace=True,
     use_cache=ws_settings.use_cache,
+    secrets_file=ws_settings.ws_dir.joinpath("secrets/app_secrets.yml"),
 )
 
 # -*- Api Server running FastAPI on port 9090
@@ -42,6 +41,7 @@ dev_api_server = ApiServer(
     image=dev_ml_server_image,
     mount_workspace=True,
     use_cache=ws_settings.use_cache,
+    secrets_file=ws_settings.ws_dir.joinpath("secrets/api_secrets.yml"),
 )
 
 # -*- Postgres database used for dev data

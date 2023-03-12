@@ -5,8 +5,6 @@ Usage:
 
 import typer
 
-from api.utils.log import logger, set_log_level_to_debug
-
 
 cli = typer.Typer(
     help="Run Api commands",
@@ -17,13 +15,10 @@ cli = typer.Typer(
 )
 
 
-@cli.command(short_help="Start")
+@cli.command(short_help="Start Api Server")
 def start(
     reload: bool = typer.Option(
         False, "--reload", "-r", help="Reload", show_default=True
-    ),
-    print_debug_log: bool = typer.Option(
-        False, "--debug", "-d", help="Print debug logs."
     ),
 ):
     """
@@ -37,9 +32,7 @@ def start(
     """
     import uvicorn
     from api.settings import api_settings
-
-    if print_debug_log:
-        set_log_level_to_debug()
+    from api.utils.log import logger
 
     logger.info("Starting Api")
     uvicorn.run(
@@ -51,11 +44,7 @@ def start(
 
 
 @cli.command(short_help="Print Settings")
-def settings(
-    print_debug_log: bool = typer.Option(
-        False, "-d", "--debug", help="Print debug logs."
-    ),
-):
+def settings():
     """
     \b
     Print Api settings.
@@ -63,12 +52,9 @@ def settings(
     \b
     Examples:
     * `api settings`    -> Print Api settings
-    * `api settings -d` -> Print Api settings with debug logs
     """
     from api.settings import api_settings
-
-    if print_debug_log:
-        set_log_level_to_debug()
+    from api.utils.log import logger
 
     logger.info("Api Settings:")
     logger.info(api_settings.json(indent=2))
