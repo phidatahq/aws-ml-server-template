@@ -4,7 +4,7 @@ set -e
 
 CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 REPO_ROOT="$( dirname ${CURR_DIR} )"
-REPO="phidata"
+REPO="local"
 NAME="ml001"
 TAG="dev"
 

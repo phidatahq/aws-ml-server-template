@@ -1,43 +1,53 @@
-import os
-from typing import List
-
 import duckdb
 import streamlit as st
-from streamlit.runtime.uploaded_file_manager import UploadedFile
 
 
-def create_duckdb(duckdb_path: str = ":memory:") -> duckdb.DuckDBPyConnection:
-    # By default, duckdb is fully in-memory - we can provide a path to get
-    # persistent storage
+def create_duckdb_conn(db_path: str = ":memory:") -> duckdb.DuckDBPyConnection:
+    """
+    Create a duckdb connection
 
-    duckdb_connection = duckdb.connect(duckdb_path)
+    Args:
+        db_path (str, optional): Path to the database. Defaults to ":memory:".
+
+    Returns:
+        duckdb.DuckDBPyConnection: duckdb connection
+    """
+    duckdb_connection = duckdb.connect(db_path)
     try:
         duckdb_connection.sql("INSTALL httpfs;")
         duckdb_connection.sql("LOAD httpfs;")
+        duckdb_connection.sql("SET s3_region='us-east-1';")
     except Exception:
-        print(
-            "Failed to install httpfs extension. Only loading from local files will be supported"
+        st.write(
+            "Failed to install httpfs extension. Only local files will be supported"
         )
 
     duckdb_connection.sql(
-        "create temporary table if not exists _qabot_queries(query VARCHAR PRIMARY KEY, result VARCHAR)"
+        "create temporary table if not exists _querybot(query VARCHAR PRIMARY KEY, result VARCHAR)"
     )
 
     return duckdb_connection
 
 
-def load_file(
-    duckdb_connection: duckdb.DuckDBPyConnection, uploaded_file: UploadedFile
+def load_s3_path(
+    duckdb_connection: duckdb.DuckDBPyConnection, load_s3_path: str
 ) -> str:
-    # Get the file name without extension from the uploaded_file
-    table_name, extension = os.path.splitext(uploaded_file.name)
-    if extension == ".csv":
-        duckdb.read_csv(uploaded_file)
-    # elif extension == ".json":
-    #     duckdb.read_json(uploaded_file)
-    # elif extension == ".parquet":
-    #     duckdb.read_parquet(uploaded_file)
+    """
+    Load a file from S3 into duckdb
 
+    Args:
+        duckdb_connection (duckdb.DuckDBPyConnection): duckdb connection
+        load_s3_path (str): S3 path to load
+
+    Returns:
+        str: SQL statement used to load the file
+    """
+    import os
+
+    # Get the file name from the s3 path
+    file_name = load_s3_path.split("/")[-1]
+    # Get the file name without extension from the s3 path
+    table_name, extension = os.path.splitext(file_name)
     # If the table_name isn't a valid SQL identifier, we'll need to use something else
     table_name = (
         table_name.replace("-", "_")
@@ -45,19 +55,12 @@ def load_file(
         .replace(" ", "_")
         .replace("/", "_")
     )
+
     create_statement = (
-        f"create table '{table_name}' as select * from '{uploaded_file}';"
+        f"CREATE OR REPLACE TABLE '{table_name}' AS SELECT * FROM '{load_s3_path}';"
     )
-    st.write(f"create_statement: {create_statement}")
-    st.write(f"Created table: {table_name} from: {uploaded_file.name}")
-    # duckdb_connection.sql(create_statement)
+    duckdb_connection.sql(create_statement)
+    st.session_state["table_name"] = table_name
+    st.session_state["data_loaded"] = True
+    st.write(f"▶️▶️ Created table: {table_name}")
     return create_statement
-
-
-def load_files(
-    duckdb_connection: duckdb.DuckDBPyConnection, files: List[UploadedFile]
-) -> List[str]:
-    executed_sql = []
-    for file_path in files:
-        executed_sql.append(load_file(duckdb_connection, file_path))
-    return executed_sql

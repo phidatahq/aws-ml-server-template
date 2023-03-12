@@ -52,8 +52,6 @@ def start(
         str(app_settings.gather_usage_stats),
         "--server.maxUploadSize",
         str(app_settings.max_upload_size),
-        "--runner.magicEnabled",
-        str(app_settings.magic_enabled),
     ]
     sys.exit(stcli.main())
 

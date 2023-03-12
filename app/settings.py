@@ -13,8 +13,7 @@ class AppSettings(BaseSettings):
     headless: bool = True
     gather_usage_stats: bool = False
     # Max size, in megabytes, for files uploaded with the file_uploader.
-    max_upload_size: int = 100
-    magic_enabled: bool = False
+    max_upload_size: int = 256
 
 
 # Create AppSettings object
