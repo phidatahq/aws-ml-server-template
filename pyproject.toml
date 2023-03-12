@@ -65,6 +65,8 @@ exclude = [
 
 [[tool.mypy.overrides]]
 module = [
+  "duckdb.*",
+  "langchain.*",
   "pandas.*",
   "phidata.*",
   "setuptools.*",

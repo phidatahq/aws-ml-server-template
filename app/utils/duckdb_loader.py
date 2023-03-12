@@ -62,5 +62,5 @@ def load_s3_path(
     duckdb_connection.sql(create_statement)
     st.session_state["table_name"] = table_name
     st.session_state["data_loaded"] = True
-    st.write(f"▶️▶️ Created table: {table_name}")
+    # st.write(f"▶️▶️ Creating table: {table_name}")
     return create_statement
