@@ -1,7 +1,7 @@
-from phidata.app.postgres import PostgresDb
-from phidata.app.server import ApiServer, AppServer
+from phidata.app.server import AppServer
 from phidata.docker.config import DockerConfig, DockerImage
 
+from workspace.dev.jupyter.docker_resources import dev_jupyter_lab
 from workspace.settings import ws_settings
 
 #
@@ -12,9 +12,6 @@ from workspace.settings import ws_settings
 dev_ml_server_image = DockerImage(
     name=f"{ws_settings.image_repo}/{ws_settings.ws_name}",
     tag=ws_settings.dev_env,
-    # Use the pre-built image by default
-    # enabled=False,
-    # To build your own image, uncomment the following line
     enabled=(ws_settings.build_images and ws_settings.dev_ml_server_enabled),
     path=str(ws_settings.ws_dir.parent),
     # platform="linux/amd64",
@@ -34,33 +31,11 @@ dev_app_server = AppServer(
     secrets_file=ws_settings.ws_dir.joinpath("secrets/app_secrets.yml"),
 )
 
-# -*- Api Server running FastAPI on port 9090
-dev_api_server = ApiServer(
-    name=f"{ws_settings.ws_name}-api",
-    enabled=ws_settings.dev_api_server_enabled,
-    image=dev_ml_server_image,
-    mount_workspace=True,
-    use_cache=ws_settings.use_cache,
-    secrets_file=ws_settings.ws_dir.joinpath("secrets/api_secrets.yml"),
-)
-
-# -*- Postgres database used for dev data
-dev_db = PostgresDb(
-    name=f"{ws_settings.ws_name}-db",
-    enabled=ws_settings.dev_postgres_enabled,
-    db_user=ws_settings.ws_name,
-    db_password=ws_settings.ws_name,
-    db_schema=ws_settings.ws_name,
-    # Connect to this db on port 9325
-    container_host_port=9325,
-)
-
 #
 # -*- Define dev Docker resources using the DockerConfig
 #
 dev_docker_config = DockerConfig(
     env=ws_settings.dev_env,
     network=ws_settings.ws_name,
-    apps=[dev_api_server, dev_app_server, dev_db],
-    images=[dev_ml_server_image],
+    apps=[dev_app_server, dev_jupyter_lab],
 )

@@ -1,8 +1,6 @@
 from phidata.aws.config import AwsConfig
 from phidata.aws.resource.group import (
     AwsResourceGroup,
-    DbInstance,
-    DbSubnetGroup,
     EcsCluster,
     EcsContainer,
     EcsService,
@@ -26,40 +24,7 @@ wait_for_create: bool = True
 # Wait for the resource to be deleted
 wait_for_delete: bool = True
 
-# -*- RDS Database Subnet Group
-prd_db_subnet_group = DbSubnetGroup(
-    name=f"{ws_settings.prd_key}-db-sg",
-    enabled=ws_settings.prd_postgres_enabled,
-    subnet_ids=ws_settings.subnet_ids,
-    skip_create=skip_create,
-    skip_delete=skip_delete,
-    wait_for_creation=wait_for_create,
-    wait_for_deletion=wait_for_delete,
-)
-
-# -*- ML database instance
-db_engine = "postgres"
-prd_db_instance = DbInstance(
-    name=f"{ws_settings.prd_key}-db",
-    engine=db_engine,
-    enabled=ws_settings.prd_postgres_enabled,
-    engine_version="14.5",
-    allocated_storage=100,
-    # NOTE: For production, use a larger instance type.
-    # Last checked price: $0.152 per hour = ~$110 per month
-    db_instance_class="db.m6g.large",
-    availability_zone=ws_settings.aws_az1,
-    db_subnet_group=prd_db_subnet_group,
-    enable_performance_insights=True,
-    vpc_security_group_ids=ws_settings.security_groups,
-    secrets_file=ws_settings.ws_dir.joinpath("secrets/prd_postgres_secrets.yml"),
-    skip_create=skip_create,
-    skip_delete=skip_delete,
-    wait_for_creation=wait_for_create,
-    wait_for_deletion=wait_for_delete,
-)
-
-# -*- ECS cluster
+# -*- Create ECS cluster to run ML Apps
 launch_type = "FARGATE"
 prd_ecs_cluster = EcsCluster(
     name=f"{ws_settings.prd_key}-cluster",
@@ -72,25 +37,16 @@ prd_ecs_cluster = EcsCluster(
     wait_for_deletion=wait_for_delete,
 )
 
-# -*- ML Server Container
-ml_server_container_port = 8000
-prd_ml_server_container = EcsContainer(
-    name=ws_settings.ws_name,
+# -*- ML App Container running Streamlit on ECS
+app_container_port = 9095
+prd_app_container = EcsContainer(
+    name=f"{ws_settings.ws_name}-app",
     enabled=ws_settings.prd_ml_server_enabled,
     image=prd_ml_server_image.get_image_str(),
-    port_mappings=[{"containerPort": ml_server_container_port}],
-    command=["api-prd"],
+    port_mappings=[{"containerPort": app_container_port}],
+    command=["app start"],
     environment=[
         {"name": "RUNTIME", "value": "prd"},
-        # Database configuration
-        # {"name": "WAIT_FOR_DB", "value": "True"},
-        # {"name": "DB_HOST", "value": ""},
-        # {"name": "DB_PORT", "value": "5432"},
-        # {"name": "DB_USER", "value": prd_db_instance.get_master_username()},
-        # {"name": "DB_PASS", "value": prd_db_instance.get_master_user_password()},
-        # {"name": "DB_SCHEMA", "value": prd_db_instance.get_db_name()},
-        # Upgrade database on startup
-        # {"name": "UPGRADE_DB", "value": "True"},
     ],
     log_configuration={
         "logDriver": "awslogs",
@@ -98,19 +54,19 @@ prd_ml_server_container = EcsContainer(
             "awslogs-group": ws_settings.prd_key,
             "awslogs-region": ws_settings.aws_region,
             "awslogs-create-group": "true",
-            "awslogs-stream-prefix": "ml-server",
+            "awslogs-stream-prefix": "app",
         },
     },
 )
 
-# -*- ML Server Task Definition
-prd_ml_server_task = EcsTaskDefinition(
+# -*- ML App Task Definition
+prd_app_task_definition = EcsTaskDefinition(
     name=f"{ws_settings.prd_key}-td",
     family=ws_settings.prd_key,
     network_mode="awsvpc",
     cpu="512",
     memory="1024",
-    containers=[prd_ml_server_container],
+    containers=[prd_app_container],
     requires_compatibilities=[launch_type],
     skip_create=skip_create,
     skip_delete=skip_delete,
@@ -118,23 +74,23 @@ prd_ml_server_task = EcsTaskDefinition(
     wait_for_deletion=wait_for_delete,
 )
 
-# -*- ML Server Service
-prd_ml_service = EcsService(
+# -*- ML App Service
+prd_app_service = EcsService(
     name=f"{ws_settings.prd_key}-service",
     ecs_service_name=ws_settings.prd_key,
     desired_count=1,
     launch_type=launch_type,
     cluster=prd_ecs_cluster,
-    task_definition=prd_ml_server_task,
+    task_definition=prd_app_task_definition,
     network_configuration={
         "awsvpcConfiguration": {
-            "subnets": ws_settings.subnet_ids,
-            "securityGroups": ws_settings.security_groups,
+            # "subnets": ws_settings.subnet_ids,
+            # "securityGroups": ws_settings.security_groups,
             "assignPublicIp": "ENABLED",
         }
     },
-    force_delete=True,
-    force_new_deployment=True,
+    # force_delete=True,
+    # force_new_deployment=True,
     skip_create=skip_create,
     skip_delete=skip_delete,
     wait_for_creation=wait_for_create,
@@ -144,11 +100,9 @@ prd_ml_service = EcsService(
 # -*- AwsResourceGroup
 prd_aws_resources = AwsResourceGroup(
     name=ws_settings.prd_key,
-    db_subnet_groups=[prd_db_subnet_group],
-    db_instances=[prd_db_instance],
     ecs_clusters=[prd_ecs_cluster],
-    ecs_task_definitions=[prd_ml_server_task],
-    ecs_services=[prd_ml_service],
+    ecs_task_definitions=[prd_app_task_definition],
+    ecs_services=[prd_app_service],
 )
 
 #

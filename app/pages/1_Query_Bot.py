@@ -155,21 +155,11 @@ def querybot_main():
             elif msg["role"] == "system":
                 message(msg["content"], key=str(i), seed=42)
 
-        # for msg in st.session_state["chat_history"]:
-        #     if msg["role"] == "user":
-        #         message(msg["content"], is_user=True)
-        #     elif msg["role"] == "assistant":
-        #         message(msg["content"])
-
+    # Show the table
     st.markdown("---")
-    # Show the data
     if "table_name" in st.session_state:
         table_name = st.session_state["table_name"]
-        if st.session_state.get("show_data", True):
-            if st.button(f"📊  Show table: {table_name}"):
-                st.session_state["show_data"] = True
-
-        if st.session_state.get("show_data", False):
+        if st.sidebar.button(f"📊  Show table: {table_name}"):
             df = (
                 st.session_state["duckdb_connection"]
                 .sql(f"SELECT * FROM {table_name};")
@@ -185,7 +175,7 @@ st.set_page_config(page_title="Query bot", page_icon="🤖")
 st.markdown("## Run Natural Language Queries on files")
 st.write(
     """Querybot uses OpenAI, DuckDb and Langchain to run Natural Language Queries on files.
-    Provide a dataset, ask a question and it will respond.
+    Read a dataset, ask a question and it will respond.
     """
 )
 

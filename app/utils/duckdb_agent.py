@@ -82,6 +82,8 @@ Refuse to delete any data, or drop tables. When answering, you MUST query the da
 Check the available tables exist first. Prefer to take single independent actions. Prefer to create views
 of data as one action, then select data from the view.
 
+Share the SQL queries you use to get the answer.
+
 It is important that you use the exact phrase "Final Answer: " in your final answer.
 List all SQL queries returned by Data Op in your final answer.
 
