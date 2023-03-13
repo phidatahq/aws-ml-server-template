@@ -1,4 +1,4 @@
-from phidata.app.server import AppServer
+from phidata.app.server import AppServer, ApiServer
 from phidata.docker.config import DockerConfig, DockerImage
 
 from workspace.dev.jupyter.docker_resources import dev_jupyter_lab
@@ -31,11 +31,21 @@ dev_app_server = AppServer(
     secrets_file=ws_settings.ws_dir.joinpath("secrets/app_secrets.yml"),
 )
 
+# -*- Api Server running FastAPI on port 9090
+dev_api_server = ApiServer(
+    name=f"{ws_settings.ws_name}-api",
+    enabled=ws_settings.dev_api_server_enabled,
+    image=dev_ml_server_image,
+    mount_workspace=True,
+    use_cache=ws_settings.use_cache,
+    secrets_file=ws_settings.ws_dir.joinpath("secrets/api_secrets.yml"),
+)
+
 #
 # -*- Define dev Docker resources using the DockerConfig
 #
 dev_docker_config = DockerConfig(
     env=ws_settings.dev_env,
     network=ws_settings.ws_name,
-    apps=[dev_app_server, dev_jupyter_lab],
+    apps=[dev_app_server, dev_api_server, dev_jupyter_lab],
 )

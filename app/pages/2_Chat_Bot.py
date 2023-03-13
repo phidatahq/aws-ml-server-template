@@ -55,7 +55,6 @@ def chatbot_demo():
                 message(msg["content"])
 
 
-st.set_page_config(page_title="Chat bot", page_icon="🤖")
 st.markdown("# Chatting with GPT-3.5 Turbo")
 st.write("This is a chatbot built using OpenAI. Send it a message and it will respond.")
 

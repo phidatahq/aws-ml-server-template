@@ -37,7 +37,10 @@ prd_ecs_cluster = EcsCluster(
     wait_for_deletion=wait_for_delete,
 )
 
-# -*- ML App Container running Streamlit on ECS
+#
+# -*- AWS Resources for App Server running Streamlit
+#
+# -*- App Container running Streamlit on ECS
 app_container_port = 9095
 prd_app_container = EcsContainer(
     name=f"{ws_settings.ws_name}-app",
@@ -59,7 +62,7 @@ prd_app_container = EcsContainer(
     },
 )
 
-# -*- ML App Task Definition
+# -*- App Task Definition
 prd_app_task_definition = EcsTaskDefinition(
     name=f"{ws_settings.prd_key}-td",
     family=ws_settings.prd_key,
@@ -74,7 +77,7 @@ prd_app_task_definition = EcsTaskDefinition(
     wait_for_deletion=wait_for_delete,
 )
 
-# -*- ML App Service
+# -*- App Service
 prd_app_service = EcsService(
     name=f"{ws_settings.prd_key}-service",
     ecs_service_name=ws_settings.prd_key,
@@ -97,12 +100,75 @@ prd_app_service = EcsService(
     wait_for_deletion=wait_for_delete,
 )
 
+#
+# -*- AWS Resources for Api Server running FastAPI
+#
+# -*- Api Container running FastAPI on ECS
+api_container_port = 9090
+prd_api_container = EcsContainer(
+    name=f"{ws_settings.ws_name}-api",
+    enabled=ws_settings.prd_ml_server_enabled,
+    image=prd_ml_server_image.get_image_str(),
+    port_mappings=[{"containerPort": api_container_port}],
+    command=["api start"],
+    environment=[
+        {"name": "RUNTIME", "value": "prd"},
+    ],
+    log_configuration={
+        "logDriver": "awslogs",
+        "options": {
+            "awslogs-group": ws_settings.prd_key,
+            "awslogs-region": ws_settings.aws_region,
+            "awslogs-create-group": "true",
+            "awslogs-stream-prefix": "api",
+        },
+    },
+)
+
+# -*- Api Task Definition
+prd_api_task_definition = EcsTaskDefinition(
+    name=f"{ws_settings.prd_key}-td",
+    family=ws_settings.prd_key,
+    network_mode="awsvpc",
+    cpu="512",
+    memory="1024",
+    containers=[prd_api_container],
+    requires_compatibilities=[launch_type],
+    skip_create=skip_create,
+    skip_delete=skip_delete,
+    wait_for_creation=wait_for_create,
+    wait_for_deletion=wait_for_delete,
+)
+
+# -*- Api Service
+prd_api_service = EcsService(
+    name=f"{ws_settings.prd_key}-service",
+    ecs_service_name=ws_settings.prd_key,
+    desired_count=1,
+    launch_type=launch_type,
+    cluster=prd_ecs_cluster,
+    task_definition=prd_api_task_definition,
+    network_configuration={
+        "awsvpcConfiguration": {
+            # "subnets": ws_settings.subnet_ids,
+            # "securityGroups": ws_settings.security_groups,
+            "assignPublicIp": "ENABLED",
+        }
+    },
+    # force_delete=True,
+    # force_new_deployment=True,
+    skip_create=skip_create,
+    skip_delete=skip_delete,
+    wait_for_creation=wait_for_create,
+    wait_for_deletion=wait_for_delete,
+)
+
 # -*- AwsResourceGroup
 prd_aws_resources = AwsResourceGroup(
     name=ws_settings.prd_key,
     ecs_clusters=[prd_ecs_cluster],
-    ecs_task_definitions=[prd_app_task_definition],
-    ecs_services=[prd_app_service],
+    ecs_task_definitions=[prd_app_task_definition, prd_api_task_definition],
+    ecs_services=[prd_app_service, prd_api_service],
 )
 
 #

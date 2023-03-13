@@ -171,7 +171,6 @@ def querybot_main():
 #
 # -*- Run the app
 #
-st.set_page_config(page_title="Query bot", page_icon="🤖")
 st.markdown("## Run Natural Language Queries on files")
 st.write(
     """Querybot uses OpenAI, DuckDb and Langchain to run Natural Language Queries on files.

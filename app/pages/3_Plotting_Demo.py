@@ -28,7 +28,6 @@ def plotting_demo():
     st.button("Re-run")
 
 
-st.set_page_config(page_title="Plotting Demo", page_icon="📈")
 st.markdown("# Plotting Demo")
 st.write(
     """This demo illustrates plotting and animation with Streamlit.
