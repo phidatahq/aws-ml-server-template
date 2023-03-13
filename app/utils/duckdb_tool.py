@@ -25,4 +25,4 @@ class DuckDBTool(BaseTool):
         return query_result
 
     async def _arun(self, query: str) -> str:
-        raise NotImplementedError("DuckDBTool does not support async")
+        raise NotImplementedError("Not supported")
